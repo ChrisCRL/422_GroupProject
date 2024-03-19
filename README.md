@@ -8,6 +8,8 @@ ML project created by Charles Ballesteros, Christopher Liscano, and Ethan Zambra
  
  https://www.kaggle.com/datasets/sudarshan24byte/online-food-dataset
 
+Project Details
+
 1. Whether the motivation of the project is well described.
 2. Whether computational challenges are well described.
 3. Whether the dataset is well described.
