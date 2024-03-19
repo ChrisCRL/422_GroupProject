@@ -2,7 +2,14 @@
 
 ML project created by Charles Ballesteros, Christopher Liscano, and Ethan Zambrano
 
+(real world problem) Database options:
+ https://www.kaggle.com/datasets/sumanthnimmagadda/student-spending-dataset
+ https://www.kaggle.com/datasets/vellis1/us-cities-urban-connectivity
+ 
+ https://www.kaggle.com/datasets/sudarshan24byte/online-food-dataset
+
 Project Details
+
 1. Whether the motivation of the project is well described.
 2. Whether computational challenges are well described.
 3. Whether the dataset is well described.
