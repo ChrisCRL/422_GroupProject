@@ -2,15 +2,8 @@
 
 ML project created by Charles Ballesteros, Christopher Liscano, and Ethan Zambrano
 
-(real world problem) Database options:
- https://www.kaggle.com/datasets/sumanthnimmagadda/student-spending-dataset
- https://www.kaggle.com/datasets/vellis1/us-cities-urban-connectivity
- https://www.kaggle.com/datasets/marouandaghmoumi/dropout-and-success-student-data-analysis
- https://www.kaggle.com/datasets/imyjoshua/average-time-spent-by-a-user-on-social-media
- https://www.kaggle.com/datasets/shariful07/student-mental-health
- https://www.kaggle.com/datasets/arashnic/adhd-diagnosis-data
- 
- https://www.kaggle.com/datasets/sudarshan24byte/online-food-dataset
+Database Chosen:
+https://www.kaggle.com/datasets/sumanthnimmagadda/student-spending-dataset
 
 Project Details
 
