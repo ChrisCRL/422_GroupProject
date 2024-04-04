@@ -6,3 +6,16 @@
  * Output: Table showing coefficients of the seven independent variables
  *         and RMSE, for each fold (10-fold).
 """
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import KFold
+
+#-- load the data file --
+
+#-- Preprocess the data as needed --
+
+# -- machine learning implementations --
+
+# -- main ? --
+
+# -- output section --
