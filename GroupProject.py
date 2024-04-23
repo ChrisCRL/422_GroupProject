@@ -4,7 +4,7 @@
  *                     Ethan Zambrano
  * Input: .data file: student_spending.csv
  * Output: Table showing coefficients of the seven independent variables
- *         and RMSE, for each fold (10-fold).
+ *         and RMSE, for each fold (10-fold). ### CHANGE THIS TO BETTER SUIT OUR DATASET
 """
 import pandas as pd
 import numpy as np
