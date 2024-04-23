@@ -16,6 +16,9 @@ data = pd.read_csv('student_spending.csv')  # 1000 rows x 18 columns
 data = data.rename(columns={'Unnamed: 0': 'Student'})
 
 # -- Preprocess the data as needed --
+
+# change un-numerical data into numerical data in features: gender, year_in_school, major, preferred_payment_method
+
 # 'y' contains the unnamed number labels 0 - 999
 y = data.iloc[:, 0]  # 999 rows x 1 col
 
