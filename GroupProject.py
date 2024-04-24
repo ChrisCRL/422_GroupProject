@@ -7,17 +7,24 @@
  *         and RMSE, for each fold (10-fold). ### CHANGE THIS TO BETTER SUIT OUR DATASET
 """
 import pandas as pd
-import numpy as np
-from sklearn.model_selection import KFold
 
 # -- load the data file --
 # Loads the CSV file/dataset
 data = pd.read_csv('student_spending.csv')  # 1000 rows x 18 columns
 data = data.rename(columns={'Unnamed: 0': 'Student'})
-
+print(data)
 # -- Preprocess the data as needed --
 
 # change un-numerical data into numerical data in features: gender, year_in_school, major, preferred_payment_method
+dict_gender = {'Female': 0, 'Male': 1, 'Non-binary': 3}
+dict_year_in_school = {'Freshman': 1, 'Sophomore': 2, 'Junior': 3, 'Senior': 4}
+dict_major = {'Biology': 1, 'Economics': 2, 'Computer Science': 3, 'Engineering': 4, 'Pyschology': 5}
+dict_preferred_payment_method = {'Cash': 1, 'Credit/Debit Card': 2, 'Mobile Payment App': 3}
+
+data['gender'] = data['gender'].map(dict_gender)
+data['year_in_school'] = data['year_in_school'].map(dict_year_in_school)
+data['major'] = data['major'].map(dict_major)
+data['preferred_payment_method'] = data['preferred_payment_method'].map(dict_preferred_payment_method)
 
 # 'y' contains the unnamed number labels 0 - 999
 y = data.iloc[:, 0]  # 999 rows x 1 col
