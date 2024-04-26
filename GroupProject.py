@@ -46,6 +46,7 @@ for categories in cat_columns:
     plt.title(f'Distribution of {categories[0].upper() + categories[1:]}')  # plot title
     plt.show()  # display plot
 
+# TODO:
 # honestly there are so many graphs you can do, you guys can pick any and code it lol. maybe create a heatmap??? - Chris
 
 # -- Encode categorical data into multiple labels which are used for training --
@@ -65,8 +66,6 @@ for categories in cat_columns:
     one_hot_df.columns = one_hot_df.columns.str.replace(categories, '')
 
 # -- Creating new dataframe
-# THE LABELS ARE LOCATED WITHIN THE NEW ENCODED DATAFRAME!!!! - Chris
-
 drop_columns = cat_columns  # columns we are dropping
 drop_columns.append('Student')
 df_copy = df
@@ -85,7 +84,6 @@ df.to_csv('new_student_spending.csv', index=False)  # can remove if want, used f
 # when testing labels, do it one by one. Be sure to temporarily drop other labels when testing them individually - Chris
 
 # 'X' contains the features
-# X = df_copy
 
 # -- machine learning implementations (KNN and linear regression)--
 
