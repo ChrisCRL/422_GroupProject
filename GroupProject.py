@@ -15,13 +15,13 @@ import seaborn as sns
 # -- load the data file --
 # Loads the CSV file/dataset
 data = pd.read_csv('student_spending.csv')  # 1000 rows x 18 columns
+
+# -- Preprocess the data as needed --
 data = data.rename(columns={'Unnamed: 0': 'Student'})  # naming unlabelled column
 
 # converting to pandas dataframe
 df = pd.DataFrame(data)
 
-
-# -- Preprocess the data as needed --
 
 # -- Data analysis before training --
 # creates a countPlot based on the categorical data within the dataframe
@@ -46,7 +46,7 @@ for categories in cat_columns:
     plt.title(f'Distribution of {categories[0].upper() + categories[1:]}')  # plot title
     plt.show()  # display plot
 
-# honestly there are so many graphs you can do, you guys can pick any and code it lol. maybe create a heatmap????
+# honestly there are so many graphs you can do, you guys can pick any and code it lol. maybe create a heatmap??? - Chris
 
 # -- Encode categorical data into multiple labels which are used for training --
 # 1. gender (Male, Female)
@@ -64,10 +64,28 @@ for categories in cat_columns:
     categories = categories + '_'
     one_hot_df.columns = one_hot_df.columns.str.replace(categories, '')
 
-# 'y' contains the unnamed number labels 0 - 999
-y = data.iloc[:, 0]  # 999 rows x 1 col
-# 'X' contains the features (label 'Student' is separated)
-X = data.drop('Student', axis=1)  # 1000 rows x 17 col
+# -- Creating new dataframe
+# THE LABELS ARE LOCATED WITHIN THE NEW ENCODED DATAFRAME!!!! - Chris
+
+drop_columns = cat_columns  # columns we are dropping
+drop_columns.append('Student')
+df_copy = df
+
+# dropping Student since it's useless. dropping categorical data to replace with encoded data
+df_copy.drop(columns=drop_columns, inplace=True)
+
+# merging the two dataframes
+concatenated_df = pd.concat([one_hot_df, df_copy], axis=1)
+df = concatenated_df
+df.to_csv('new_student_spending.csv', index=False)  # can remove if want, used for debugging purposes - Chris
+
+# TODO:
+# -- Creating training data
+# 'y' contains labels (first 15 columns)
+# when testing labels, do it one by one. Be sure to temporarily drop other labels when testing them individually - Chris
+
+# 'X' contains the features
+# X = df_copy
 
 # -- machine learning implementations (KNN and linear regression)--
 
