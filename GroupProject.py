@@ -88,8 +88,8 @@ df.to_csv('new_student_spending.csv', index=False)  # can remove if want, used f
 # -- machine learning implementations (KNN and linear regression)--
 
 
-# - use cross-validation to compare between KNN and linear reg -
+# - use cross-validation to compare between KNN and linear reg - (if possible)
 
 # -- main --
 
-# -- output section --
+# -- output/print section --
