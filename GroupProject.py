@@ -4,11 +4,15 @@
  *                     Ethan Zambrano
  * Input: a .csv file: student_spending.csv
  * Output: Table showing coefficients of the seven independent variables
- *         and RMSE, for each fold (10-fold). ### CHANGE THIS TO BETTER SUIT OUR DATASET
+ *         and RMSE, for each fold (10-fold). ### CHANGE THIS TO BETTER SUIT OUR DATASET/WORk
 """
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
+from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -17,7 +21,7 @@ import seaborn as sns
 data = pd.read_csv('student_spending.csv')  # 1000 rows x 18 columns
 
 # -- Preprocess the data as needed --
-data = data.rename(columns={'Unnamed: 0': 'Student'})  # naming unlabelled column
+data = data.rename(columns={'Unnamed: 0': 'Student'})  # naming unlabeled column
 
 # converting to pandas dataframe
 df = pd.DataFrame(data)
@@ -78,18 +82,75 @@ concatenated_df = pd.concat([one_hot_df, df_copy], axis=1)
 df = concatenated_df
 df.to_csv('new_student_spending.csv', index=False)  # can remove if want, used for debugging purposes - Chris
 
+
 # TODO:
 # -- Creating training data
-# 'y' contains labels (first 15 columns)
 # when testing labels, do it one by one. Be sure to temporarily drop other labels when testing them individually - Chris
 
-# 'X' contains the features
+# LINEAR REGRESSION: Uses LR to analyze the relationship between gender/year_in_school and student spending habits
+#                   - Model to predict student spending based on gender/year_in_school
+# Define the features (gender / year in school)
+features = ['Female', 'Male', 'Non-binary', 'Freshman', 'Junior', 'Senior', 'Sophomore']
 
-# -- machine learning implementations (KNN and linear regression)--
+expense_categories = ['tuition', 'housing', 'food', 'transportation', 'books_supplies',
+                      'entertainment', 'personal_care', 'technology', 'health_wellness',
+                      'miscellaneous']
+
+# Initialize StandardScaler { CAN REMOVE }
+scaler = StandardScaler()
+
+X = df[features]  # X contains the one-hot encoded features
+
+X_scaled = scaler.fit_transform(X)  # Fit and transform the features
+
+expense_results = {}  # dictionary to store the expense results
+
+# Iterate over each expense category
+for LR_category in expense_categories:
+    y = data[LR_category]  # Define the target variable
+
+    # Split the data into training and testing sets
+    X_train_scaled, X_test_scaled, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+# -- machine learning implementation (linear regression)--
+    # Create and train the linear regression model
+    model = LinearRegression()
+    model.fit(X_train_scaled, y_train)
+
+    predict_y = model.predict(X_test_scaled)  # Make predictions on the test set
+
+    # Evaluate RMSE and R-squared
+    # - calculate RMSE mean and sum (MAYBE remove sum ?)
+    rmse_mean = np.sqrt(np.mean((y_test - predict_y) ** 2))
+    rmse_sum = np.sqrt(np.sum((y_test - predict_y) ** 2))
+
+    r2 = r2_score(y_test, predict_y)
+
+    # Get the number of observations and features
+    n = X_scaled.shape[0]
+    p = X_scaled.shape[1]
+
+    # - Calculate adjusted R-squared
+    adj_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1)
+
+    # Store the results in the specified dictionary
+    expense_results[LR_category] = {'rmse_mean': rmse_mean, 'rmse_sum': rmse_sum, 'adj_r2': adj_r2}
 
 
-# - use cross-validation to compare between KNN and linear reg -
+# 'y' contains ...
 
-# -- main --
+# 'X' contains ...
 
-# -- output section --
+# -- machine learning implementations (KNN) --
+
+
+# - use cross-validation to compare between KNN and linear reg - (if possible)
+
+# -- output/print section --
+print('---------------------')
+for print_category, result in expense_results.items():
+    print(f'Category: {print_category}')
+    print(f'RMSE (mean): {result["rmse_mean"]}')
+    print(f'RMSE (sum): {result["rmse_sum"]}')
+    print(f'R-squared: {result["adj_r2"]}')
+    print('---------------------')
