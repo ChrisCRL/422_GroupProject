@@ -107,20 +107,19 @@ expense_results = {}  # dictionary to store the expense results
 
 # Iterate over each expense category
 for LR_category in expense_categories:
-    y = data[LR_category]  # Define the target variable
+    y = data[LR_category]  # y contains target variable
 
     # Split the data into training and testing sets
     X_train_scaled, X_test_scaled, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
-# -- machine learning implementation (linear regression)--
-    # Create and train the linear regression model
-    model = LinearRegression()
+# -- machine learning implementation (linear regression) --
+    model = LinearRegression()  # Create and train the linear regression model
     model.fit(X_train_scaled, y_train)
 
     predict_y = model.predict(X_test_scaled)  # Make predictions on the test set
 
     # Evaluate RMSE and R-squared
-    # - calculate RMSE mean and sum (MAYBE remove sum ?)
+    # - calculate RMSE mean and sum (MAYBE remove RMSE_sum ?)
     rmse_mean = np.sqrt(np.mean((y_test - predict_y) ** 2))
     rmse_sum = np.sqrt(np.sum((y_test - predict_y) ** 2))
 
