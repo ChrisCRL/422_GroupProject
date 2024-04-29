@@ -29,7 +29,7 @@ df = pd.DataFrame(data)
 
 
 # -- Data analysis before training --
-# creates a countPlot based on the categorical data within the dataframe
+# creates a count_plot based on the categorical data within the dataframe
 def count_plot(category, df):
     sns.set(style='darkgrid')
 
@@ -55,7 +55,7 @@ for categories in cat_columns:
 # honestly there are so many graphs you can do, you guys can pick any and code it lol. maybe create a heatmap??? - Chris
 
 # -- Encode categorical data into multiple labels which are used for training --
-# 1. gender (Male, Female)
+# 1. gender (Male, Female, Non-binary)
 # 2. year_in_school(Freshman, Sophomore, Junior, Senior)
 # 3. major (Biology, Economics, Computer Science, Engineering, Psychology)
 # 4. preferred_payment_method (Cash, Credit/Debit Card, Mobile Payment App
