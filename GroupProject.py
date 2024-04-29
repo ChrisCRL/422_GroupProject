@@ -8,13 +8,14 @@
 """
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
-from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
+
 
 # -- load the data file --
 # Loads the CSV file/dataset
@@ -29,7 +30,7 @@ df = pd.DataFrame(data)
 
 # -- Data analysis before training --
 # creates a countPlot based on the categorical data within the dataframe
-def countPlot(category, df):
+def count_plot(category, df):
     sns.set(style='darkgrid')
 
     plt.figure(figsize=(9, 9))
@@ -46,7 +47,7 @@ cat_columns = df.select_dtypes(include=['object']).columns.tolist()  # obtaining
 
 # creating count plots
 for categories in cat_columns:
-    countPlot(categories, df)
+    count_plot(categories, df)
     plt.title(f'Distribution of {categories[0].upper() + categories[1:]}')  # plot title
     plt.show()  # display plot
 
@@ -136,12 +137,22 @@ for LR_category in expense_categories:
     expense_results[LR_category] = {'rmse_mean': rmse_mean, 'rmse_sum': rmse_sum, 'adj_r2': adj_r2}
 
 
-# 'y' contains ...
+# 'X' contains the one-hot encoded features
 
-# 'X' contains ...
+for LR_category in expense_categories:
+    y = data[LR_category]  # y contains target variable
+
+    # Split the data into training and testing sets
+    X_train_scaled, X_test_scaled, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, random_state=42)
 
 # -- machine learning implementations (KNN) --
 
+    knn = KNeighborsRegressor(n_neighbors=4)
+    knn.fit(X_train_scaled, y_train)
+
+    y_pred = knn.predict(X_test_scaled)
+
+    print(r2_score(y_test, y_pred))
 
 # - use cross-validation to compare between KNN and linear reg - (if possible)
 
