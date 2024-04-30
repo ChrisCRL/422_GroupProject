@@ -1,6 +1,6 @@
 """
  * CS 422 - 1002, Final Group Project
- * Group Member Names: Charles Ballesteros, Christopher Liscano, and
+ * Group Member Names: Charles Joseph Ballesteros, Christopher Liscano, and
  *                     Ethan Zambrano
  * Input: a .csv file: student_spending.csv
  * Output: Table showing coefficients of the seven independent variables
@@ -8,15 +8,16 @@
 """
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import seaborn as sns
+import matplotlib.pyplot as plt
+from tabulate import tabulate
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
-from sklearn.model_selection import cross_val_score
 from sklearn import svm
+from sklearn.metrics import r2_score
+
 
 # -- load the data file --
 # Loads the CSV file/dataset
@@ -27,7 +28,6 @@ data = data.rename(columns={'Unnamed: 0': 'Student'})  # naming unlabeled column
 
 # converting to pandas dataframe
 df = pd.DataFrame(data)
-
 
 # -- Data analysis before training --
 # creates a count_plot based on the categorical data within the dataframe
@@ -47,16 +47,15 @@ def count_plot(category, df):
 cat_columns = df.select_dtypes(include=['object']).columns.tolist()  # obtaining categorical data
 
 # creating count plots
-# TODO: uncomment after testing ML algo's
-# for categories in cat_columns:
-#     count_plot(categories, df)
-#     plt.title(f'Distribution of {categories[0].upper() + categories[1:]}')  # plot title
-#     plt.show()  # display plot
+for categories in cat_columns:
+    count_plot(categories, df)
+    plt.title(f'Distribution of {categories[0].upper() + categories[1:]}')  # plot title
+    plt.show()  # display plot
 
 # -- Encode categorical data into multiple labels which are used for training --
 # 1. gender (Male, Female, Non-binary)
 # 2. year_in_school(Freshman, Sophomore, Junior, Senior)
-# 3. major (Biology, Economics, Computer Science, Engi neering, Psychology)
+# 3. major (Biology, Economics, Computer Science, Engineering, Psychology)
 # 4. preferred_payment_method (Cash, Credit/Debit Card, Mobile Payment App
 one_hot_encoder = OneHotEncoder(sparse_output=False)  # initializing encoder
 encoded = one_hot_encoder.fit_transform(df[cat_columns])  # applying one hot encoding
@@ -92,16 +91,15 @@ labels = ['Female', 'Male', 'Non-binary', 'Freshman', 'Junior', 'Senior', 'Sopho
           'Biology', 'Computer Science', 'Economics', 'Engineering', 'Psychology',
           'Cash', 'Credit/Debit Card', 'Mobile Payment App']
 
-# Initialize StandardScaler
-scaler = StandardScaler()
-
 # features (skipping financial aid, monthly_income, and age since they are not spending habits)
 X = df.iloc[:, 18:]
 
+scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)  # Fit and transform the features
 
 # dictionaries to store the expense results
 LR_expense_results = {}
+KNN_expense_results = {}
 SVM_expense_results = {}
 
 # -- machine learning implementation (linear regression) --
@@ -118,10 +116,9 @@ for col in labels:
 
     predict_y = model.predict(X_test_scaled)  # Make predictions on the test set
 
-    # Evaluate RMSE and R-squared
-    # - calculate RMSE mean and sum (MAYBE remove RMSE_sum ?)
-    rmse_mean = np.sqrt(np.mean((y_test - predict_y) ** 2))
-    rmse_sum = np.sqrt(np.sum((y_test - predict_y) ** 2))
+    # - calculate RMSE mean, std, and r-squared
+    lr_rmse_mean = np.sqrt(np.mean((y_test - predict_y) ** 2))
+    lr_std = np.std(y_test)
 
     r2 = r2_score(y_test, predict_y)
 
@@ -130,28 +127,36 @@ for col in labels:
     p = X_scaled.shape[1]
 
     # - Calculate adjusted R-squared
-    adj_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1)
+    lr_adj_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1)
 
     # Store the results in the specified dictionary
-    LR_expense_results[col] = {'rmse_mean': rmse_mean, 'rmse_sum': rmse_sum, 'adj_r2': adj_r2}
+    LR_expense_results[col] = {'lr_rmse_mean': lr_rmse_mean, 'lr_adj_r2': lr_adj_r2, 'lr_std': lr_std}
 
 # -- machine learning implementation (KNN) --
 
 for col in labels:
-    y = df[labels]  # y contains target variable
+    y = df[col]  # y contains target variable
 
     # Split the data into training and testing sets
     X_train_scaled, X_test_scaled, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, random_state=10)
 
-    # TODO: maybe test multiple neighbors? idk. unless 4 is the best
-    knn = KNeighborsRegressor(n_neighbors=4)
+    # From a scale of 1 to 20, n_neighbors=19 was the best one.
+    knn = KNeighborsRegressor(n_neighbors=19)
     knn.fit(X_train_scaled, y_train)
-
     y_pred = knn.predict(X_test_scaled)
 
-    # TODO: format output
+    # RMSE, r2, and std to measure effectiveness of model.
+    knn_rmse_mean = np.sqrt(np.mean((y_test - y_pred) ** 2))
+    knn_r2 = r2_score(y_test, y_pred)
+    # Get the number of observations and features
+    n = X_scaled.shape[0]
+    p = X_scaled.shape[1]
+    # - Calculate adjusted R-squared
+    knn_adj_r2 = 1 - (1 - knn_r2) * (X_scaled.shape[0] - 1) / (n - p - 1)
 
-    print(r2_score(y_test, y_pred))
+    knn_std = np.std(y_test)
+
+    KNN_expense_results[col] = {'knn_rmse_mean': knn_rmse_mean, 'knn_adj_r2': knn_r2.mean(), 'knn_std': knn_std}
 
 # -- machine learning implementation (SVM) --
 
@@ -165,24 +170,35 @@ for col in labels:
     SVM_expense_results[col] = {'linear_svm_mean': linear_scores.mean(), 'linear_svm_std': linear_scores.std()}
 
 # -- output/print section --
-# Linear Regression
-print('*****LINEAR REGRESSION*****')
+# Linear Regression and KNN
+
+print('\n*****LINEAR REGRESSION AND SVM*****')
 print('---------------------')
-for print_category, result in LR_expense_results.items():
-    print(f'Category: {print_category}')
-    print(f'RMSE (mean): {result["rmse_mean"]}')
-    print(f'RMSE (sum): {result["rmse_sum"]}')
-    print(f'R-squared: {result["adj_r2"]}')
-    print('---------------------')
 
-# KNN
+headers = ['Category', 'LR RMSE (mean)', 'KNN RMSE (mean)', 'LR R-squared', 'KNN R-squared', 'Standard Deviation']
+data = []
 
+for category in LR_expense_results:
+    lr_rmse_mean = LR_expense_results[category]['lr_rmse_mean']
+    knn_rmse_mean = KNN_expense_results[category]['knn_rmse_mean']
+    lr_adj_r2 = LR_expense_results[category]['lr_adj_r2']
+    knn_adj_r2 = KNN_expense_results[category]['knn_adj_r2']
+    lr_std = LR_expense_results[category]['lr_std']
+    data.append((category, lr_rmse_mean, knn_rmse_mean, lr_adj_r2, knn_adj_r2, lr_std))
 
+print(tabulate(data, headers=headers, tablefmt='fancy_outline'))
 
 # Linear SVM
-print('*****LINEAR SVM*****')
-for print_category, result in SVM_expense_results.items():
-    print(f'Category: {print_category}')
-    print(f'Linear SVM (mean): {result["linear_svm_mean"]}')
-    print(f'Linear SVM (std): {result["linear_svm_std"]}')
-    print('---------------------')
+headers = ['Category', 'Linear SVM (mean)', 'Linear SVM (std)']
+data = []
+
+for category in SVM_expense_results:
+    linear_svm_mean = SVM_expense_results[category]['linear_svm_mean']
+    linear_svm_std = SVM_expense_results[category]['linear_svm_std']
+    data.append((category, linear_svm_mean, linear_svm_std))
+
+print('\n*****LINEAR SVM*****')
+print('---------------------')
+print(tabulate(data, headers=headers, tablefmt='fancy_outline'))
+
+
