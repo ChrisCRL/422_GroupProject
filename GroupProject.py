@@ -172,7 +172,7 @@ for col in labels:
 # -- output/print section --
 # Linear Regression and KNN
 
-print('\n*****LINEAR REGRESSION AND SVM*****')
+print('\n*****LINEAR REGRESSION AND KNN*****')
 print('---------------------')
 
 headers = ['Category', 'LR RMSE (mean)', 'KNN RMSE (mean)', 'LR R-squared', 'KNN R-squared', 'Standard Deviation']
