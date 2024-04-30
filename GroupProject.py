@@ -82,7 +82,6 @@ concatenated_df = pd.concat([one_hot_df, df_copy], axis=1)
 df = concatenated_df
 df.to_csv('new_student_spending.csv', index=False)  # can remove if want, used for debugging purposes - Chris
 
-
 # -- Creating training data
 # when testing labels, do it one by one. Be sure to temporarily drop other labels when testing them individually - Chris
 
@@ -101,7 +100,9 @@ X = df.iloc[:, 18:]
 
 X_scaled = scaler.fit_transform(X)  # Fit and transform the features
 
-expense_results = {}  # dictionary to store the expense results
+# dictionaries to store the expense results
+LR_expense_results = {}
+SVM_expense_results = {}
 
 # -- machine learning implementation (linear regression) --
 
@@ -110,13 +111,12 @@ for col in labels:
     y = df[col]  # y contains target variable
 
     # Split the data into training and testing sets
-    X_train_scaled, X_test_scaled, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+    X_train_scaled, X_test_scaled, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, random_state=10)
 
     model = LinearRegression()  # Create and train the linear regression model
     model.fit(X_train_scaled, y_train)
 
     predict_y = model.predict(X_test_scaled)  # Make predictions on the test set
-    print("Predictions:", predict_y)
 
     # Evaluate RMSE and R-squared
     # - calculate RMSE mean and sum (MAYBE remove RMSE_sum ?)
@@ -133,33 +133,56 @@ for col in labels:
     adj_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1)
 
     # Store the results in the specified dictionary
-    expense_results[col] = {'rmse_mean': rmse_mean, 'rmse_sum': rmse_sum, 'adj_r2': adj_r2}
+    LR_expense_results[col] = {'rmse_mean': rmse_mean, 'rmse_sum': rmse_sum, 'adj_r2': adj_r2}
+
+# -- machine learning implementation (KNN) --
 
 for col in labels:
     y = df[labels]  # y contains target variable
 
     # Split the data into training and testing sets
-    X_train_scaled, X_test_scaled, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, random_state=42)
+    X_train_scaled, X_test_scaled, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, random_state=10)
 
-# -- machine learning implementation (KNN) --
-
-    # TODO: maybe test multiple neighbors? idk
+    # TODO: maybe test multiple neighbors? idk. unless 4 is the best
     knn = KNeighborsRegressor(n_neighbors=4)
     knn.fit(X_train_scaled, y_train)
 
     y_pred = knn.predict(X_test_scaled)
 
     # TODO: format output
+
     print(r2_score(y_test, y_pred))
 
 # -- machine learning implementation (SVM) --
 
+for col in labels:
+    y = df[col]
+
+    clf_linear = svm.SVC(kernel='linear', C=1, random_state=10)
+    linear_scores = cross_val_score(clf_linear, X_scaled, y, cv=5)
+
+    # Store the results in the specified dictionary
+    SVM_expense_results[col] = {'linear_svm_mean': linear_scores.mean(), 'linear_svm_std': linear_scores.std()}
 
 # -- output/print section --
+# Linear Regression
+print('*****LINEAR REGRESSION*****')
 print('---------------------')
-for print_category, result in expense_results.items():
+for print_category, result in LR_expense_results.items():
     print(f'Category: {print_category}')
     print(f'RMSE (mean): {result["rmse_mean"]}')
     print(f'RMSE (sum): {result["rmse_sum"]}')
     print(f'R-squared: {result["adj_r2"]}')
+    print('---------------------')
+
+# KNN
+
+
+
+# Linear SVM
+print('*****LINEAR SVM*****')
+for print_category, result in SVM_expense_results.items():
+    print(f'Category: {print_category}')
+    print(f'Linear SVM (mean): {result["linear_svm_mean"]}')
+    print(f'Linear SVM (std): {result["linear_svm_std"]}')
     print('---------------------')
