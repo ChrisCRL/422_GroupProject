@@ -8,15 +8,15 @@
 """
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import seaborn as sns
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
-from sklearn.model_selection import cross_val_score
 from sklearn import svm
+from sklearn.metrics import r2_score
+
 
 # -- load the data file --
 # Loads the CSV file/dataset
@@ -27,7 +27,6 @@ data = data.rename(columns={'Unnamed: 0': 'Student'})  # naming unlabeled column
 
 # converting to pandas dataframe
 df = pd.DataFrame(data)
-
 
 # -- Data analysis before training --
 # creates a count_plot based on the categorical data within the dataframe
@@ -102,6 +101,7 @@ X_scaled = scaler.fit_transform(X)  # Fit and transform the features
 
 # dictionaries to store the expense results
 LR_expense_results = {}
+KNN_expense_results = {}
 SVM_expense_results = {}
 
 # -- machine learning implementation (linear regression) --
@@ -119,9 +119,9 @@ for col in labels:
     predict_y = model.predict(X_test_scaled)  # Make predictions on the test set
 
     # Evaluate RMSE and R-squared
-    # - calculate RMSE mean and sum (MAYBE remove RMSE_sum ?)
-    rmse_mean = np.sqrt(np.mean((y_test - predict_y) ** 2))
-    rmse_sum = np.sqrt(np.sum((y_test - predict_y) ** 2))
+    # - calculate RMSE mean
+    lr_rmse_mean = np.sqrt(np.mean((y_test - predict_y) ** 2))
+    lr_std = np.std(y_test)
 
     r2 = r2_score(y_test, predict_y)
 
@@ -130,28 +130,38 @@ for col in labels:
     p = X_scaled.shape[1]
 
     # - Calculate adjusted R-squared
-    adj_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1)
+    lr_adj_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1)
 
     # Store the results in the specified dictionary
-    LR_expense_results[col] = {'rmse_mean': rmse_mean, 'rmse_sum': rmse_sum, 'adj_r2': adj_r2}
+    LR_expense_results[col] = {'lr_rmse_mean': lr_rmse_mean, 'lr_adj_r2': lr_adj_r2, 'lr_std': lr_std}
 
 # -- machine learning implementation (KNN) --
 
 for col in labels:
-    y = df[labels]  # y contains target variable
+    y = df[col]  # y contains target variable
 
     # Split the data into training and testing sets
     X_train_scaled, X_test_scaled, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, random_state=10)
 
-    # TODO: maybe test multiple neighbors? idk. unless 4 is the best
-    knn = KNeighborsRegressor(n_neighbors=4)
+    knn = KNeighborsRegressor(n_neighbors=20)
     knn.fit(X_train_scaled, y_train)
-
     y_pred = knn.predict(X_test_scaled)
 
     # TODO: format output
 
-    print(r2_score(y_test, y_pred))
+    # RMSE, r2, and std to measure effectiveness of model.
+    knn_rmse = np.sqrt(np.mean((y_test - y_pred) ** 2))
+
+    knn_r2 = r2_score(y_test, y_pred)
+    # Get the number of observations and features
+    n = X_scaled.shape[0]
+    p = X_scaled.shape[1]
+    # - Calculate adjusted R-squared
+    knn_adj_r2 = 1 - (1 - knn_r2) * (n - 1) / (n - p - 1)
+
+    knn_std = np.std(y_test)
+
+    KNN_expense_results[col] = {'knn_rmse': knn_rmse.mean(), 'knn_adj_r2': knn_r2.mean(), 'knn_std': knn_std}
 
 # -- machine learning implementation (SVM) --
 
@@ -165,22 +175,30 @@ for col in labels:
     SVM_expense_results[col] = {'linear_svm_mean': linear_scores.mean(), 'linear_svm_std': linear_scores.std()}
 
 # -- output/print section --
+
 # Linear Regression
 print('*****LINEAR REGRESSION*****')
 print('---------------------')
 for print_category, result in LR_expense_results.items():
     print(f'Category: {print_category}')
-    print(f'RMSE (mean): {result["rmse_mean"]}')
-    print(f'RMSE (sum): {result["rmse_sum"]}')
-    print(f'R-squared: {result["adj_r2"]}')
+    print(f'RMSE (mean): {result["lr_rmse_mean"]}')
+    print(f'R-squared: {result["lr_adj_r2"]}')
+    print(f'Standard Deviation (STD): {result["lr_std"]}')
     print('---------------------')
 
 # KNN
-
-
+print('*****K-NEAREST NEIGHBORS (KNN)*****')
+print('---------------------')
+for print_category, result in KNN_expense_results.items():
+    print(f'Category: {print_category}')
+    print(f'RMSE (mean): {result["knn_rmse"]}')
+    print(f'R-Squared (Accuracy): {result["knn_adj_r2"]}')
+    print(f'Standard Deviation (STD): {result["knn_std"]}')
+    print('---------------------')
 
 # Linear SVM
 print('*****LINEAR SVM*****')
+print('---------------------')
 for print_category, result in SVM_expense_results.items():
     print(f'Category: {print_category}')
     print(f'Linear SVM (mean): {result["linear_svm_mean"]}')
