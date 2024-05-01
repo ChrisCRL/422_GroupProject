@@ -83,11 +83,11 @@ df_copy.drop(columns=drop_columns, inplace=True)
 concatenated_df = pd.concat([one_hot_df, df_copy], axis=1)
 df = concatenated_df
 
-# LINEAR REGRESSION: Uses LR to analyze the relationship between gender/year_in_school
+# LINEAR REGRESSION: Uses LR to analyze the relationship between gender/year_in_school/majors/payment_type
 #                    and student spending habits
-#                   - Model to predict student spending based on gender/year_in_school
+#                   - Model to predict student spending based on gender/year_in_school/majors/payment_type
 
-# Define the features (gender / year in school)
+# Define the features (gender / year in school / majors / payment type)
 labels = ['Female', 'Male', 'Non-binary', 'Freshman', 'Junior', 'Senior', 'Sophomore',
           'Biology', 'Computer Science', 'Economics', 'Engineering', 'Psychology',
           'Cash', 'Credit/Debit Card', 'Mobile Payment App']
